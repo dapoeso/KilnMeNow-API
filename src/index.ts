@@ -9,8 +9,8 @@ import mysql from "mysql";
 const app = express();
 
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
+  host: "kmn-dev.czcx1qotjazk.us-east-2.rds.amazonaws.com",
+  user: "admin",
   password: "kilnmenow",
   database: "dev",
 });
@@ -44,6 +44,34 @@ app.get("/kilns/:id", (req, res) => {
     INNER JOIN dev.Photo p on k.kiln_id = p.kiln_id
     WHERE k.kiln_id = ${id}`;
   db.query(q, (err, data) => {
+    if (err) return res.json(err);
+    return res.json(data);
+  });
+});
+
+app.get("/kilnsByUser/:id", (req, res) => {
+  console.log(req.params);
+  const id = req.params.id;
+  const q = 
+    `SELECT k.kiln_id, title, p.url, r.user_id, r.status, u2.username, r.id as reservation_id
+    from dev.Kiln k
+    LEFT JOIN dev.User u on k.user_id = u.user_id
+    LEFT JOIN dev.Reservation r on r.kiln_id = k.kiln_id
+    LEFT Join dev.Photo p on k.kiln_id = p.kiln_id
+    LEFT Join dev.User u2 on u2.user_id = r.user_id
+    WHERE k.user_id = '${id}'`;
+  db.query(q, (err, data) => {
+    if (err) return res.json(err);
+    return res.json(data);
+  });
+});
+
+app.post("/reservationsByKilnIds", (req, res) => {
+  console.log(req.body);
+  const ids = req.body.ids;
+  const q = `SELECT * FROM dev.Reservation WHERE kiln_id in (?)`;
+  const values = [ids];
+  db.query(q, [values], (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
   });
@@ -174,13 +202,13 @@ app.get("/reservation/:id", (req, res) => {
     });
 });
 
-app.patch("/reservation/:id", (req, res) => {
-    const q = `UPDATE dev.Reservation SET is_complete=1 WHERE id=${req.params.id}`;
-    db.query(q, (err, data) => {
-      if (err) return res.json(err);
-      return res.json(data);
-    });
-});
+// app.patch("/reservation/:id", (req, res) => {
+//     const q = `UPDATE dev.Reservation SET is_complete=1 WHERE id=${req.params.id}`;
+//     db.query(q, (err, data) => {
+//       if (err) return res.json(err);
+//       return res.json(data);
+//     });
+// });
 
 app.patch("/cancel-reservation/:id", (req, res) => {
     const q = `DELETE FROM dev.Reservation WHERE id=${req.params.id}`;
@@ -188,6 +216,17 @@ app.patch("/cancel-reservation/:id", (req, res) => {
       if (err) return res.json(err);
       return res.json(data);
     });
+});
+
+app.patch("/update-reservation/:id", (req, res) => {
+  console.log(req.body);
+  const { status } = req.body;
+  const id = req.params.id;
+  const q = `UPDATE dev.Reservation SET status="${status}" WHERE id="${id}"`;
+  db.query(q, (err, data) => {
+    if (err) return res.json(err);
+    return res.json(data);
+  });
 });
 
 
