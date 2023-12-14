@@ -9,10 +9,10 @@ import mysql from "mysql";
 const app = express();
 
 const db = mysql.createConnection({
-  host: "kmn-dev.czcx1qotjazk.us-east-2.rds.amazonaws.com",
-  user: "admin",
-  password: "kilnmenow",
-  database: "dev",
+  host: process.env.HOST,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DB,
 });
 
 // if you have auth problem
