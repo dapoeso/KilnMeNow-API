@@ -234,7 +234,8 @@ app.patch("/update-reservation/:id", (req, res) => {
 // app.use(cookieParser());
 
 // const server = http.createServer(app);
+const port = process.env.PORT || 6969;
 
-app.listen(6969, () => {
-  console.log("Server running on http://localhost:6969/");
+app.listen(port, () => {
+  console.log(`Server running on ${port}`);
 });
